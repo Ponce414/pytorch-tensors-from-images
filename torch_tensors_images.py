@@ -47,8 +47,18 @@ def show_tensor_image(img_tensor: torch.Tensor, title: str, save_path: Path | No
     - Use `img_tensor.permute(1, 2, 0)` to go from (C,H,W) -> (H,W,C)
     - Convert to numpy with `.detach().cpu().numpy()`
     """
-    raise NotImplementedError("TODO: implement show_tensor_image()")
+    img_hwc = img_tensor.permute(1, 2, 0).detach().cpu().numpy()
 
+    plt.figure()
+    plt.imshow(img_hwc)
+    plt.title(title)
+
+    if save_path is not None:
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(save_path, bbox_inches="tight", dpi=200)
+
+    #plt.savefig("image2.png")
+    plt.show()
 
 def image_tensor_to_vector(img_tensor: torch.Tensor) -> torch.Tensor:
     """
@@ -58,13 +68,13 @@ def image_tensor_to_vector(img_tensor: torch.Tensor) -> torch.Tensor:
     - `img_tensor.flatten()` returns a 1D tensor
     - Keep the order consistent so that reshaping back recovers the original
     """
-    raise NotImplementedError("TODO: implement image_tensor_to_vector()")
+    return img_tensor.flatten()
 
 def main() -> None:
     data_root = Path(__file__).resolve().parent / "data"
     dataset = get_dataset(data_root)
 
-    index = 0
+    index = 2
     pil_img, label = dataset[index]
 
     img_tensor = pil_to_tensor(pil_img)
@@ -75,15 +85,25 @@ def main() -> None:
     assert img_tensor.shape[0] == 3, f"Expected 3 channels (RGB). Got shape={tuple(img_tensor.shape)}"
 
     class_name = dataset.classes[label] if hasattr(dataset, "classes") else str(label)
+    
     # TODO: print the label (numeric + class name)
-    # TODO: print the min and max values in the tensor
+    print(f"Label (numeric): {label}")
+    print(f"Label (class): {class_name}")
 
+    # TODO: print the min and max values in the tensor
+    print(f"Tensor min: {img_tensor.min().item()}")
+    print(f"tensor max: {img_tensor.max().item()}")
 
     # TODO: vectorize the image tensor and print the vector shape
     vec = image_tensor_to_vector(img_tensor)
-    # TODO: Print the shape of vec
-    # TODO: reshape vec back to the original image shape and verify it matches the original tensor
 
+    # TODO: Print the shape of vec
+    print(f"Vector shape: {tuple(vec.shape)}")
+
+    # TODO: reshape vec back to the original image shape and verify it matches the original tensor
+    reshaped = vec.view_as(img_tensor)
+    matches = torch.allclose(reshaped, img_tensor)
+    print(f"Reshape matches original: {matches}") # (3 * 32 * 32) = 3072
 
     show_tensor_image(img_tensor, title=f"CIFAR-10 — {class_name}")
 
