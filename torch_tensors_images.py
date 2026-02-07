@@ -80,7 +80,6 @@ def main() -> None:
 
 
     # TODO: vectorize the image tensor and print the vector shape
-
     vec = image_tensor_to_vector(img_tensor)
     # TODO: Print the shape of vec
     # TODO: reshape vec back to the original image shape and verify it matches the original tensor
